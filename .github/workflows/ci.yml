@@ -1,0 +1,71 @@
+name: Continuous Integration Process
+
+on: pull_request
+
+jobs:
+  lint:
+    runs-on: self-hosted
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+
+    - name: Run lint
+      run: echo 'linting...'
+
+    - name: Checkout latest version
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Check commit message
+      uses: wagoid/commitlint-github-action@v1
+
+    - name: Check With nodejs ^12
+      uses: actions/setup-node@v1
+      with:
+        node-version: '12.x'
+
+    - name: Install dependencies
+      run: yarn install --silent
+
+    - name: Lint With yarn
+      run: yarn lint
+
+  build:
+    needs: lint
+    runs-on: self-hosted
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+
+    - name: Run build
+      run: echo 'building...'
+
+    - name: Checkout latest version
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Install Dependencies
+      run: yarn install --silent
+
+    - name: Build With yarn
+      run: yarn build
+
+  test:
+    needs: build
+    runs-on: self-hosted
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+
+    - name: Run test
+      run: echo 'testing...'
+
+    - name: Checkout latest version
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Test With yarn
+      run: echo 'yarn test'
